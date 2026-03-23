@@ -15,6 +15,8 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +36,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.NotEnabledException;
+import org.eclipse.core.commands.NotHandledException;
+import org.eclipse.core.commands.common.NotDefinedException;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -67,6 +73,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.navigator.ICommonMenuConstants;
 
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -107,6 +114,7 @@ import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
 
@@ -114,6 +122,8 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
  * Java specific text editor.
  */
 public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProvider.InputChangeListener {
+	private static final String MARKETPLACE_WIZARD_COMMAND_ID= "org.eclipse.epp.mpc.ui.command.showMarketplaceWizard"; //$NON-NLS-1$
+	private static final String MARKETPLACE_DECOMPILER_SEARCH_URL= "https://marketplace.eclipse.org/search/site/java%20decompiler"; //$NON-NLS-1$
 
 	private final class LoadJob extends Job implements IElementChangedListener {
 		private final IJavaElement fElement;
@@ -265,6 +275,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				ExceptionHandler.handle(e, fComposite.getShell(), title, message);
 			}
 
+			createMarketplaceControls(fComposite);
+
 			separator= createCompositeSeparator(fComposite);
 			data= new GridData(GridData.FILL_HORIZONTAL);
 			data.heightHint= 2;
@@ -341,6 +353,25 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			}
 
 			button.addSelectionListener(getButtonListener(entry, containerPath, jproject, canEditEncoding));
+		}
+
+		private void createMarketplaceControls(Composite composite) {
+			createLabel(composite, null);
+			createLabel(composite, JavaEditorMessages.SourceAttachmentForm_message_findDecompiler);
+			createLabel(composite, null);
+
+			Button button= createButton(composite, JavaEditorMessages.SourceAttachmentForm_button_searchMarketplace);
+			button.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent event) {
+					openMarketplaceForDecompilerTools(getSite().getShell());
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent event) {
+					widgetSelected(event);
+				}
+			});
 		}
 
 		private SelectionListener getButtonListener(final IClasspathEntry entry, final IPath containerPath, final IJavaProject jproject, final boolean canEditEncoding) {
@@ -596,6 +627,24 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		setRulerContextMenuId("#ClassFileRulerContext"); //$NON-NLS-1$
 		setOutlinerContextMenuId("#ClassFileOutlinerContext"); //$NON-NLS-1$
 		// don't set help contextId, we install our own help context
+	}
+
+	private void openMarketplaceForDecompilerTools(Shell shell) {
+		IHandlerService handlerService= getSite().getService(IHandlerService.class);
+		if (handlerService != null) {
+			try {
+				handlerService.executeCommand(MARKETPLACE_WIZARD_COMMAND_ID, null);
+				return;
+			} catch (ExecutionException | NotDefinedException | NotEnabledException | NotHandledException e) {
+				// Fall back to the Marketplace website if the Marketplace client is unavailable.
+			}
+		}
+
+		try {
+			OpenBrowserUtil.openExternal(new URL(MARKETPLACE_DECOMPILER_SEARCH_URL), shell.getDisplay());
+		} catch (MalformedURLException e) {
+			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), "Invalid Eclipse Marketplace URL", e)); //$NON-NLS-1$
+		}
 	}
 
 	/*

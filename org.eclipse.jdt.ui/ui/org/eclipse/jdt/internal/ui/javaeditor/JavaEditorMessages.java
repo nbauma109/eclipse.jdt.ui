@@ -106,8 +106,10 @@ final class JavaEditorMessages extends NLS {
 	public static String SourceAttachmentForm_message_pressButtonToAttach;
 	public static String SourceAttachmentForm_message_noSourceInAttachment;
 	public static String SourceAttachmentForm_message_pressButtonToChange;
+	public static String SourceAttachmentForm_message_findDecompiler;
 	public static String SourceAttachmentForm_button_attachSource;
 	public static String SourceAttachmentForm_button_changeAttachedSource;
+	public static String SourceAttachmentForm_button_searchMarketplace;
 	public static String SourceAttachmentForm_error_title;
 	public static String SourceAttachmentForm_error_message;
 	public static String SourceAttachmentForm_attach_error_title;
