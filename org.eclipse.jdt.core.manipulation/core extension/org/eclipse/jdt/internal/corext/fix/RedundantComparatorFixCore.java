@@ -89,6 +89,9 @@ public class RedundantComparatorFixCore extends CompilationUnitRewriteOperations
 						&& ASTNodes.hasType(methodBinding.getDeclaringClass(), List.class.getCanonicalName())
 						&& ASTNodes.hasType(methodBinding.getParameterTypes()[0], Comparator.class.getCanonicalName())) {
 					List<Expression> args= visited.arguments();
+					if (ASTNodes.as(args.get(0), NullLiteral.class) != null) {
+						return true;
+					}
 					return maybeRefactorCode(visited, visited.getExpression(), args.get(0));
 				}
 			}
