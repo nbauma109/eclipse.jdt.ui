@@ -49,10 +49,8 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -80,6 +78,9 @@ public class RedundantComparatorFixCore extends CompilationUnitRewriteOperations
 								|| Arrays.asList("max", "min").contains(visited.getName().getIdentifier()) && ASTNodes.hasType(methodBinding.getParameterTypes()[0], Collection.class.getCanonicalName())) //$NON-NLS-1$//$NON-NLS-2$
 						&& ASTNodes.hasType(methodBinding.getParameterTypes()[1], Comparator.class.getCanonicalName())) {
 					List<Expression> args= visited.arguments();
+					if ("sort".equals(visited.getName().getIdentifier())) { //$NON-NLS-1$
+						return maybeRefactorCode(visited, args.get(0), args.get(1));
+					}
 					return maybeRefactorCode(null, args.get(0), args.get(1));
 				}
 
@@ -374,6 +375,11 @@ public class RedundantComparatorFixCore extends CompilationUnitRewriteOperations
 				final Expression comparatorToRemove,
 				final boolean isForward) {
 			if (isForward) {
+				if (visitedIfRefactoringNeeded != null
+						&& visitedIfRefactoringNeeded.getExpression() == list
+						&& ASTNodes.as(comparatorToRemove, NullLiteral.class) != null) {
+					return true;
+				}
 				fResult.add(new RedundantComparatorFixOperation(visitedIfRefactoringNeeded, list, comparatorToRemove));
 				return false;
 			}
@@ -399,7 +405,6 @@ public class RedundantComparatorFixCore extends CompilationUnitRewriteOperations
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
-			ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.RedundantComparatorCleanUp_description, cuRewrite);
 			rewrite.setTargetSourceRangeComputer(new TargetSourceRangeComputer() {
 				@Override
@@ -413,12 +418,10 @@ public class RedundantComparatorFixCore extends CompilationUnitRewriteOperations
 			});
 
 			if (visitedIfRefactoringNeeded != null) {
-				String collectionsNameText= importRewrite.addImport(Collections.class.getCanonicalName());
-
 				MethodInvocation sortMethod= ast.newMethodInvocation();
-				sortMethod.setExpression(ASTNodeFactory.newName(ast, collectionsNameText));
+				sortMethod.setExpression(ASTNodes.createMoveTarget(rewrite, ASTNodes.getUnparenthesedExpression(list)));
 				sortMethod.setName(ast.newSimpleName("sort")); //$NON-NLS-1$
-				sortMethod.arguments().add(ASTNodes.createMoveTarget(rewrite, ASTNodes.getUnparenthesedExpression(list)));
+				sortMethod.arguments().add(ast.newNullLiteral());
 
 				ASTNodes.replaceButKeepComment(rewrite, visitedIfRefactoringNeeded, sortMethod, group);
 			} else {

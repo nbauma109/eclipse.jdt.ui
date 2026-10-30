@@ -15985,7 +15985,7 @@ public class CleanUpTest extends CleanUpTestCase {
 			public class RedundantComparatorSample {
 			    public List<Date> removeComparatorClass(List<Date> listToSort) {
 			        // Keep this comment
-			        Collections.sort(listToSort);
+			        listToSort.sort(null);
 
 			        return listToSort;
 			    }
@@ -16002,91 +16002,91 @@ public class CleanUpTest extends CleanUpTestCase {
 
 			    public List<Long> removeLambdaExpression(List<Long> listToSort) {
 			        // Keep this comment
-			        Collections.sort(listToSort);
+			        listToSort.sort(null);
 
 			        return listToSort;
 			    }
 
 			    public List<String> removeLambdaBody(List<String> listToSort) {
 			        // Keep this comment
-			        Collections.sort(listToSort);
+			        listToSort.sort(null);
 
 			        return listToSort;
 			    }
 
 			    public List<Double> removeUntypedLambda(List<Double> listToSort) {
 			        // Keep this comment
-			        Collections.sort(listToSort);
+			        listToSort.sort(null);
 
 			        return listToSort;
 			    }
 
 			    public List<Integer> removeComparatorOnPrimitive(List<Integer> listToSort) {
 			        // Keep this comment
-			        Collections.sort(listToSort);
+			        listToSort.sort(null);
 
 			        return listToSort;
 			    }
 
 			    public List<Date> removeIdentityFunction(List<Date> listToSort) {
 			        // Keep this comment
-			        Collections.sort(listToSort);
+			        listToSort.sort(null);
 
 			        return listToSort;
 			    }
 
 			    public List<Date> removeComparingLambda(List<Date> listToSort) {
 			        // Keep this comment
-			        Collections.sort(listToSort);
+			        listToSort.sort(null);
 
 			        return listToSort;
 			    }
 
 			    public List<Date> removeComparingBody(List<Date> listToSort) {
 			        // Keep this comment
-			        Collections.sort(listToSort);
+			        listToSort.sort(null);
 
 			        return listToSort;
 			    }
 
 			    public List<Date> removeUntypedParameter(List<Date> listToSort) {
 			        // Keep this comment
-			        Collections.sort(listToSort);
+			        listToSort.sort(null);
 
 			        return listToSort;
 			    }
 
 			    public List<Date> removeNaturalOrder(List<Date> listToSort) {
 			        // Keep this comment
-			        Collections.sort(listToSort);
+			        listToSort.sort(null);
 
 			        return listToSort;
 			    }
 
 			    public List<Date> removeNullComparator(List<Date> listToSort) {
 			        // Keep this comment
-			        Collections.sort(listToSort);
+			        listToSort.sort(null);
 
 			        return listToSort;
 			    }
 
 			    public List<BigDecimal> removeOpposedComparatorClass(List<BigDecimal> listToSort) {
 			        // Keep this comment
-			        Collections.sort(listToSort);
+			        listToSort.sort(null);
 
 			        return listToSort;
 			    }
 
 			    public List<Date> removeTwiceReversedComparatorClass(List<Date> listToSort) {
 			        // Keep this comment
-			        Collections.sort(listToSort);
+			        listToSort.sort(null);
 
 			        return listToSort;
 			    }
 
 			    public List<Date> refactoreSortedList(List<Date> listToSort) {
 			        // Keep this comment
-			        Collections.sort(listToSort);
+			        listToSort.sort(null);
 
 			        return listToSort;
 			    }
@@ -16116,6 +16116,10 @@ public class CleanUpTest extends CleanUpTestCase {
 			import java.util.function.Function;
 
 			public class E {
+			    public void doNotRewriteNullComparator(List<Date> listToSort) {
+			        listToSort.sort(null);
+			    }
+
 			    public List<String> doNotRemoveComparatorWithoutCompareToMethod(List<String> listToSort) {
 			        Collections.sort(listToSort, new Comparator<String>() {
 			            @Override

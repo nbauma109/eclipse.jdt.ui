@@ -70,11 +70,11 @@ public class RedundantComparatorCleanUpCore extends AbstractCleanUp {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.REDUNDANT_COMPARATOR)) {
-			return "Collections.sort(listToSort);\n\n\n\n\n\n"; //$NON-NLS-1$
+			return "listToSort.sort(null);\n\n\n\n\n\n"; //$NON-NLS-1$
 		}
 
 		return """
-			Collections.sort(listToSort, new Comparator<Date>() {
+			listToSort.sort(new Comparator<Date>() {
 			    @Override
 			    public int compare(Date o1, Date o2) {
 			        return o1.compareTo(o2);
