@@ -16104,6 +16104,27 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testKeepListSortWithNullComparator() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			import java.util.List;
+
+			public class E {
+			    public void sort(List<String> values) {
+			        values.sort(null);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.REDUNDANT_COMPARATOR);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testKeepRedundantComparator() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
